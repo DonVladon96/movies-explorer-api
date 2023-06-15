@@ -1,4 +1,3 @@
-require('dotenv').config();
 const express = require('express');
 const helmet = require('helmet');
 const mongoose = require('mongoose');
@@ -6,14 +5,15 @@ const rateLimit = require('express-rate-limit');
 const { errors } = require('celebrate');
 const bodyParser = require('body-parser');
 const cors = require('cors');
-const { DB_ADDRESS, PORT } = require('./utils/config');
+const endpoint = require('./utils/config');
+const { requestLogger, errorLogger } = require('./middlewares/logger');
 
-mongoose.set('strictQuery', false);
-mongoose.connect(DB_ADDRESS).then(() => {
-  // eslint-disable-next-line no-console
+const { PORT = 3000 } = process.env;
+require('dotenv').config();
+
+mongoose.connect(endpoint).then(() => {
   console.log('Connected to database.');
 }).catch((error) => {
-  // eslint-disable-next-line no-console
   console.error('Error connecting to database:', error);
 });
 
@@ -26,6 +26,13 @@ const limiter = rateLimit({
   legacyHeaders: false,
 });
 
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
+app.use(requestLogger);
+app.use(routes);
+
+app.use(errorLogger);
 app.use(limiter);
 app.use(helmet());
 app.use(cors());
@@ -35,5 +42,5 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(errors());
 app.listen(PORT, () => {
   // eslint-disable-next-line no-console
-  console.log(`Go on ${PORT}`);
+  console.log(`Listening server on ${PORT} port`);
 });
