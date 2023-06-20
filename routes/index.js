@@ -1,7 +1,9 @@
 const router = require('express').Router();
+
 const userRouter = require('./users');
 const movieRouter = require('./movies');
-const NotFoundError = require('../utils/errors/Not-found-error-404');
+const { NotFoundError } = require('../utils/errors/Not-found-error-404');
+
 const authRouter = require('./auth');
 const auth = require('../middlewares/auth');
 

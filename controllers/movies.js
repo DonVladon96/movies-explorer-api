@@ -10,6 +10,8 @@ const Movie = require('../modeles/movie');
 const {
   HTTP_STATUS_OK,
   HTTP_STATUS_CREATED,
+  BadRequestMessage,
+  MovieForbiddenMessage,
 } = require('../utils/constants');
 
 module.exports.getMovies = (req, res, next) => {
@@ -25,7 +27,7 @@ module.exports.createMovies = (req, res, next) => {
     .then((newMovie) => res.status(HTTP_STATUS_CREATED).send(newMovie))
     .catch((err) => {
       if (err instanceof Error.CastError) {
-        next(new BadRequestError('Введены некорретные данные'));
+        next(new BadRequestError(BadRequestMessage));
       } else {
         next(err);
       }
@@ -44,12 +46,12 @@ module.exports.deleteMovie = async (req, res, next) => {
           .then(res.status(HTTP_STATUS_OK).send(movie))
           .catch(next);
       } else {
-        next(new ForbiddenError());
+        next(new ForbiddenError(MovieForbiddenMessage));
       }
     })
     .catch((err) => {
       if (err instanceof Error.CastError) {
-        next(new BadRequestError('Вы не можете удалить фильм'));
+        next(new BadRequestError(BadRequestMessage));
       } else {
         next(err);
       }

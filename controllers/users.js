@@ -7,7 +7,12 @@ const { NODE_ENV, JWT_SECRET } = process.env;
 const User = require('../modeles/user');
 const { NotFoundError404, ConflictError, BadRequestError } = require('../utils/errors');
 
-const { HTTP_STATUS_OK, HTTP_STATUS_CREATED } = require('../utils/constants');
+const {
+  HTTP_STATUS_OK, HTTP_STATUS_CREATED,
+  BadRequestMessage,
+  UserConflictMessage,
+  UserNotFoundMessage,
+} = require('../utils/constants');
 
 module.exports.createUser = (req, res, next) => {
   const { name, email, password } = req.body;
@@ -25,9 +30,9 @@ module.exports.createUser = (req, res, next) => {
       })
       .catch((err) => {
         if (err instanceof Error.ValidationError) {
-          next(new BadRequestError('При регистрации были введены некорректные данные'));
+          next(new BadRequestError(BadRequestMessage));
         } else if (err.code === 11000) {
-          next(new ConflictError('Пользователь уже существует'));
+          next(new ConflictError(UserConflictMessage));
         } else {
           next(err);
         }
@@ -38,14 +43,14 @@ module.exports.createUser = (req, res, next) => {
 module.exports.getUser = (req, res, next) => {
   User.findById(req.user._id)
     .orFail(() => {
-      throw new NotFoundError404('Пользователь не найден');
+      throw new NotFoundError404(UserNotFoundMessage);
     })
     .then((user) => {
       res.status(HTTP_STATUS_OK).send(user);
     })
     .catch((err) => {
       if (err instanceof Error.CastError) {
-        next(new BadRequestError('Введены некорректные данные'));
+        next(new BadRequestError(BadRequestMessage));
       } else {
         next(err);
       }
@@ -61,17 +66,17 @@ module.exports.updateUser = (req, res, next) => {
     { new: true, runValidators: true },
   )
     .orFail(() => {
-      throw new NotFoundError404('Пользователь не найден');
+      throw new NotFoundError404(UserNotFoundMessage);
     })
     .then((user) => {
       if (!user) {
-        throw new NotFoundError404('User is not found');
+        throw new NotFoundError404(UserNotFoundMessage);
       }
       res.status(HTTP_STATUS_OK).send(user);
     })
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        next(new BadRequestError('Введены некорректные данные'));
+        next(new BadRequestError(BadRequestMessage));
       } else {
         next(err);
       }
