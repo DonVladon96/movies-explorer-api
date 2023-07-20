@@ -29,6 +29,7 @@ const limiter = rateLimit({
   legacyHeaders: false,
 });
 
+app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(helmet());
@@ -38,7 +39,7 @@ app.use(routes);
 app.use(errorLogger);
 app.use(limiter);
 
-app.use(cors());
+
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 
