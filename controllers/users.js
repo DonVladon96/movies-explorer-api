@@ -75,8 +75,10 @@ module.exports.updateUser = (req, res, next) => {
       res.status(HTTP_STATUS_OK).send(user);
     })
     .catch((err) => {
-      if (err.name === 'ValidationError') {
+      if (err instanceof Error.ValidationError) {
         next(new BadRequestError(BadRequestMessage));
+      } else if (err.code === 11000) {
+        next(new ConflictError(UserConflictMessage));
       } else {
         next(err);
       }
